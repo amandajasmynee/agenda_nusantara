@@ -3,8 +3,9 @@ class TaskModel {
   final String title;
   final String description;
   final String dueDate;
-  final String category; // 'important' atau 'regular'
-  final int isDone;      // 0 = belum, 1 = selesai
+  final String category;
+  final int isDone;
+  final String? completedDate;
 
   TaskModel({
     this.id,
@@ -13,6 +14,7 @@ class TaskModel {
     required this.dueDate,
     required this.category,
     this.isDone = 0,
+    this.completedDate,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +25,7 @@ class TaskModel {
       'due_date': dueDate,
       'category': category,
       'is_done': isDone,
+      'completed_date': completedDate,
     };
   }
 
@@ -34,6 +37,7 @@ class TaskModel {
       dueDate: map['due_date'] as String,
       category: map['category'] as String,
       isDone: map['is_done'] as int,
+      completedDate: map['completed_date'] as String?,
     );
   }
 
@@ -44,6 +48,8 @@ class TaskModel {
     String? dueDate,
     String? category,
     int? isDone,
+    String? completedDate,
+    bool clearCompletedDate = false,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -52,6 +58,8 @@ class TaskModel {
       dueDate: dueDate ?? this.dueDate,
       category: category ?? this.category,
       isDone: isDone ?? this.isDone,
+      completedDate:
+          clearCompletedDate ? null : (completedDate ?? this.completedDate),
     );
   }
 }

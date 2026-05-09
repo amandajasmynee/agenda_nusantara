@@ -8,7 +8,7 @@ class DatabaseHelper {
 
   DatabaseHelper._internal();
 
-  // ─── Getter database (buat jika belum ada) ───────────────────────────────
+  // ── Getter database ────────────────────────────────────────────────────────
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -22,144 +22,191 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
+  // ── onCreate ───────────────────────────────────────────────────────────────
+
   Future<void> _onCreate(Database db, int version) async {
-    // Tabel tasks
     await db.execute('''
       CREATE TABLE tasks (
-        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        title       TEXT    NOT NULL,
-        description TEXT    NOT NULL,
-        due_date    TEXT    NOT NULL,
-        category    TEXT    NOT NULL,
-        is_done     INTEGER NOT NULL DEFAULT 0
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        title          TEXT    NOT NULL,
+        description    TEXT    NOT NULL,
+        due_date       TEXT    NOT NULL,
+        category       TEXT    NOT NULL,
+        is_done        INTEGER NOT NULL DEFAULT 0,
+        completed_date TEXT
       )
     ''');
 
-    // Tabel user
     await db.execute('''
       CREATE TABLE user (
         id       INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT    NOT NULL UNIQUE,
-        password TEXT    NOT NULL
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL
       )
     ''');
 
-    // Insert user default
-    await db.insert('user', {
-      'username': 'aziz',
-      'password': '12345',
-    });
+    await db.insert('user', {'username': 'aziz', 'password': '12345'});
   }
 
-  // ─── TASK: Insert ─────────────────────────────────────────────────────────
+  // ── onUpgrade ──────────────────────────────────────────────────────────────
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      final columns = await db.rawQuery('PRAGMA table_info(tasks)');
+      final exists = columns.any((c) => c['name'] == 'completed_date');
+      if (!exists) {
+        await db.execute('ALTER TABLE tasks ADD COLUMN completed_date TEXT');
+      }
+    }
+  }
+
+  // ── INSERT ─────────────────────────────────────────────────────────────────
 
   Future<int> insertTask(TaskModel task) async {
     final db = await database;
     return await db.insert(
       'tasks',
-      task.toMap()..remove('id'), // biarkan AUTOINCREMENT yang isi id
+      task.toMap()..remove('id'),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  // ─── TASK: Get All ────────────────────────────────────────────────────────
+  // ── GET ALL — filter opsional: category dan/atau isDone ───────────────────
 
-  /// Ambil semua tugas. Opsional filter berdasarkan category ('important' / 'regular').
-  Future<List<TaskModel>> getAllTasks({String? category}) async {
+  Future<List<TaskModel>> getAllTasks({
+    String? category,
+    int? isDone,
+  }) async {
     final db = await database;
 
-    List<Map<String, dynamic>> result;
+    final conditions = <String>[];
+    final args = <dynamic>[];
 
     if (category != null) {
-      result = await db.query(
-        'tasks',
-        where: 'category = ?',
-        whereArgs: [category],
-        orderBy: 'id DESC',
-      );
-    } else {
-      result = await db.query('tasks', orderBy: 'id DESC');
+      conditions.add('category = ?');
+      args.add(category);
+    }
+    if (isDone != null) {
+      conditions.add('is_done = ?');
+      args.add(isDone);
     }
 
-    return result.map((row) => TaskModel.fromMap(row)).toList();
+    final where = conditions.isNotEmpty ? conditions.join(' AND ') : null;
+
+    final result = await db.query(
+      'tasks',
+      where: where,
+      whereArgs: args.isNotEmpty ? args : null,
+      orderBy: 'id DESC',
+    );
+
+    return result.map((r) => TaskModel.fromMap(r)).toList();
   }
 
-  // ─── TASK: Update Status (selesai / belum) ────────────────────────────────
+  // ── UPDATE STATUS + COMPLETED DATE ────────────────────────────────────────
 
   Future<int> updateTaskStatus(int id, int isDone) async {
     final db = await database;
     return await db.update(
       'tasks',
-      {'is_done': isDone},
+      {
+        'is_done': isDone,
+        'completed_date': isDone == 1 ? _todayString() : null,
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
   }
 
-  // ─── TASK: Delete ─────────────────────────────────────────────────────────
+  // ── DELETE ─────────────────────────────────────────────────────────────────
 
   Future<int> deleteTask(int id) async {
     final db = await database;
-    return await db.delete(
-      'tasks',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('tasks', where: 'id = ?', whereArgs: [id]);
   }
 
-  // ─── TASK: Count Done ─────────────────────────────────────────────────────
+  // ── COUNT DONE ─────────────────────────────────────────────────────────────
 
   Future<int> countDoneTasks() async {
     final db = await database;
-    final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM tasks WHERE is_done = 1',
-    );
-    return Sqflite.firstIntValue(result) ?? 0;
+    final r =
+        await db.rawQuery('SELECT COUNT(*) as c FROM tasks WHERE is_done = 1');
+    return Sqflite.firstIntValue(r) ?? 0;
   }
 
-  // ─── TASK: Count Undone ───────────────────────────────────────────────────
+  // ── COUNT UNDONE ───────────────────────────────────────────────────────────
 
   Future<int> countUndoneTasks() async {
     final db = await database;
-    final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM tasks WHERE is_done = 0',
-    );
-    return Sqflite.firstIntValue(result) ?? 0;
+    final r =
+        await db.rawQuery('SELECT COUNT(*) as c FROM tasks WHERE is_done = 0');
+    return Sqflite.firstIntValue(r) ?? 0;
   }
 
-  // ─── USER: Check Login ────────────────────────────────────────────────────
+  // ── GRAFIK: 7 hari terakhir selalu 7 titik, count = 0 jika tidak ada ──────
 
-  /// Return true jika username + password cocok di database.
+  Future<List<Map<String, dynamic>>> getCompletedTasksPerDay() async {
+    final db = await database;
+
+    // Ambil semua data grouped by completed_date
+    final rows = await db.rawQuery('''
+      SELECT completed_date as date, COUNT(*) as count
+      FROM tasks
+      WHERE is_done = 1
+        AND completed_date IS NOT NULL
+      GROUP BY completed_date
+    ''');
+
+    // Jadikan map { 'dd/MM/yyyy': count }
+    final Map<String, int> countMap = {
+      for (final r in rows) r['date'] as String: r['count'] as int,
+    };
+
+    // Bangun 7 hari terakhir (hari ini = index 6)
+    final List<Map<String, dynamic>> result = [];
+    final today = DateTime.now();
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final label = _formatDate(date);
+      result.add({
+        'date': label,
+        'count': countMap[label] ?? 0,
+      });
+    }
+
+    return result; // selalu 7 elemen, urut dari terlama → hari ini
+  }
+
+  // ── CHECK LOGIN ────────────────────────────────────────────────────────────
+
   Future<bool> checkLogin(String username, String password) async {
     final db = await database;
-    final result = await db.query(
+    final r = await db.query(
       'user',
       where: 'username = ? AND password = ?',
       whereArgs: [username, password],
     );
-    return result.isNotEmpty;
+    return r.isNotEmpty;
   }
 
-  // ─── USER: Change Password ────────────────────────────────────────────────
+  // ── CHANGE PASSWORD ────────────────────────────────────────────────────────
 
-  /// Return true jika berhasil update. Cek dulu password lama sebelum ganti.
   Future<bool> changePassword(
       String username, String oldPassword, String newPassword) async {
     final db = await database;
-
-    // Verifikasi password lama dulu
     final check = await db.query(
       'user',
       where: 'username = ? AND password = ?',
       whereArgs: [username, oldPassword],
     );
-
-    if (check.isEmpty) return false; // password lama salah
+    if (check.isEmpty) return false;
 
     final count = await db.update(
       'user',
@@ -167,7 +214,14 @@ class DatabaseHelper {
       where: 'username = ?',
       whereArgs: [username],
     );
-
     return count > 0;
   }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  String _todayString() => _formatDate(DateTime.now());
+
+  String _formatDate(DateTime d) => '${d.day.toString().padLeft(2, '0')}/'
+      '${d.month.toString().padLeft(2, '0')}/'
+      '${d.year}';
 }

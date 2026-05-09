@@ -2,6 +2,39 @@ import 'package:flutter/material.dart';
 import 'database_helper.dart';
 import 'task_model.dart';
 
+// ── Helper: parsing argument dari Navigator ────────────────────────────────
+//
+// Argument bisa berupa:
+//   String          → category lama (backward-compatible)
+//   Map<String,dynamic> → {category, isDone, addCategory}
+//   null            → semua tugas
+
+class _PageArgs {
+  final String? category; // filter kategori (null = semua)
+  final int? isDone; // filter status (null = semua)
+  final String? addCategory; // kategori default tombol tambah
+
+  const _PageArgs({this.category, this.isDone, this.addCategory});
+
+  factory _PageArgs.fromArgument(Object? arg) {
+    if (arg == null) {
+      return const _PageArgs();
+    }
+    // Backward-compatible: argument lama berupa String category
+    if (arg is String) {
+      return _PageArgs(category: arg, addCategory: arg);
+    }
+    if (arg is Map<String, dynamic>) {
+      return _PageArgs(
+        category: arg['category'] as String?,
+        isDone: arg['isDone'] as int?,
+        addCategory: arg['addCategory'] as String?,
+      );
+    }
+    return const _PageArgs();
+  }
+}
+
 class TaskListPage extends StatefulWidget {
   const TaskListPage({super.key});
 
@@ -12,14 +45,16 @@ class TaskListPage extends StatefulWidget {
 class _TaskListPageState extends State<TaskListPage> {
   List<TaskModel> _tasks = [];
   bool _isLoading = true;
-  String? _category;
+  late _PageArgs _args;
   bool _initialized = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      _category = ModalRoute.of(context)?.settings.arguments as String?;
+      _args = _PageArgs.fromArgument(
+        ModalRoute.of(context)?.settings.arguments,
+      );
       _initialized = true;
     }
     _loadTasks();
@@ -27,8 +62,10 @@ class _TaskListPageState extends State<TaskListPage> {
 
   Future<void> _loadTasks() async {
     setState(() => _isLoading = true);
-    final tasks =
-        await DatabaseHelper.instance.getAllTasks(category: _category);
+    final tasks = await DatabaseHelper.instance.getAllTasks(
+      category: _args.category,
+      isDone: _args.isDone,
+    );
     if (!mounted) return;
     setState(() {
       _tasks = tasks;
@@ -64,20 +101,33 @@ class _TaskListPageState extends State<TaskListPage> {
     if (confirm == true) {
       await DatabaseHelper.instance.deleteTask(task.id!);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tugas dihapus')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Tugas dihapus')));
       _loadTasks();
     }
   }
 
-  String? get _addTaskArgument => _category;
-
+  // Judul halaman berdasarkan kombinasi filter
   String get _pageTitle {
-    if (_category == 'important') return 'Tugas Penting';
-    if (_category == 'regular') return 'Tugas Biasa';
+    if (_args.isDone == 1) return 'Tugas Selesai';
+    if (_args.isDone == 0) return 'Tugas Belum Selesai';
+    if (_args.category == 'important') return 'Tugas Penting';
+    if (_args.category == 'regular') return 'Tugas Biasa';
     return 'Semua Tugas';
   }
+
+  // Kategori yang dikirim ke AddTaskPage:
+  // - filter status (isDone) → pakai addCategory atau default 'regular'
+  // - filter kategori → pakai kategori itu
+  // - semua tugas → null (AddTaskPage tampilkan pilihan)
+  String? get _addTaskArgument {
+    if (_args.isDone != null) return null;
+    return _args.category; // bisa null → pilihan muncul
+  }
+
+  // FAB hanya tampil jika bukan halaman filter "Selesai"
+  // (tidak masuk akal menambah tugas baru dari halaman tugas selesai)
+  bool get _showFab => _args.isDone != 1;
 
   @override
   Widget build(BuildContext context) {
@@ -90,15 +140,16 @@ class _TaskListPageState extends State<TaskListPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _tasks.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.inbox_rounded, size: 64, color: Colors.grey),
-                      SizedBox(height: 12),
+                      Icon(Icons.inbox_rounded,
+                          size: 64, color: Colors.grey.shade300),
+                      const SizedBox(height: 12),
                       Text(
                         'Belum ada tugas',
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: Colors.grey.shade400),
                       ),
                     ],
                   ),
@@ -119,23 +170,25 @@ class _TaskListPageState extends State<TaskListPage> {
                     },
                   ),
                 ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.pushNamed(
-            context,
-            '/add-task',
-            arguments: _addTaskArgument,
-          );
-          _loadTasks();
-        },
-        backgroundColor: const Color(0xFFCC0000),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      floatingActionButton: _showFab
+          ? FloatingActionButton(
+              onPressed: () async {
+                await Navigator.pushNamed(
+                  context,
+                  '/add-task',
+                  arguments: _addTaskArgument,
+                );
+                _loadTasks();
+              },
+              backgroundColor: const Color(0xFFCC0000),
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
     );
   }
 }
 
-// ── Widget Task Card ─────────────────────────────────────────────────────────
+// ── Task Card ─────────────────────────────────────────────────────────────────
 
 class _TaskCard extends StatelessWidget {
   final TaskModel task;
@@ -160,17 +213,14 @@ class _TaskCard extends StatelessWidget {
       elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: arrowColor.withOpacity(0.35),
-          width: 1.2,
-        ),
+        side: BorderSide(color: arrowColor.withOpacity(0.35), width: 1.2),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // ── Checklist ────────────────────────────────────────────────
+            // Checklist
             GestureDetector(
               onTap: onToggle,
               child: Icon(
@@ -183,12 +233,11 @@ class _TaskCard extends StatelessWidget {
             ),
             const SizedBox(width: 12),
 
-            // ── Konten ───────────────────────────────────────────────────
+            // Konten
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Judul
                   Text(
                     task.title,
                     style: TextStyle(
@@ -200,8 +249,6 @@ class _TaskCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-
-                  // Deskripsi
                   if (task.description.isNotEmpty) ...[
                     const SizedBox(height: 3),
                     Text(
@@ -214,10 +261,7 @@ class _TaskCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
-
                   const SizedBox(height: 8),
-
-                  // Badge kategori + tanggal
                   Row(
                     children: [
                       // Badge kategori
@@ -228,9 +272,7 @@ class _TaskCard extends StatelessWidget {
                           color: badgeColor.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: badgeColor.withOpacity(0.5),
-                            width: 1,
-                          ),
+                              color: badgeColor.withOpacity(0.5), width: 1),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -255,8 +297,6 @@ class _TaskCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-
-                      // Tanggal jatuh tempo
                       const Icon(Icons.calendar_today,
                           size: 11, color: Colors.grey),
                       const SizedBox(width: 3),
@@ -265,6 +305,18 @@ class _TaskCard extends StatelessWidget {
                         style:
                             const TextStyle(fontSize: 11, color: Colors.grey),
                       ),
+                      // Tanggal selesai
+                      if (isDone && task.completedDate != null) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.check_circle_outline,
+                            size: 11, color: Colors.green),
+                        const SizedBox(width: 3),
+                        Text(
+                          task.completedDate!,
+                          style: const TextStyle(
+                              fontSize: 11, color: Colors.green),
+                        ),
+                      ],
                     ],
                   ),
                 ],
@@ -272,33 +324,24 @@ class _TaskCard extends StatelessWidget {
             ),
             const SizedBox(width: 10),
 
-            // ── Tombol Hapus + Panah ─────────────────────────────────────
+            // Hapus + panah
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Hapus
                 GestureDetector(
                   onTap: onDelete,
-                  child: const Icon(
-                    Icons.delete_outline,
-                    color: Colors.red,
-                    size: 22,
-                  ),
+                  child: const Icon(Icons.delete_outline,
+                      color: Colors.red, size: 22),
                 ),
                 const SizedBox(height: 10),
-
-                // Panah — lebih besar dan jelas
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: arrowColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: arrowColor,
-                    size: 22,
-                  ),
+                  child: Icon(Icons.arrow_forward_ios_rounded,
+                      color: arrowColor, size: 22),
                 ),
               ],
             ),
