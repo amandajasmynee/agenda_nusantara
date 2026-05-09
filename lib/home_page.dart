@@ -18,9 +18,9 @@ class _HomePageState extends State<HomePage> {
   String _greeting() {
     final hour = DateTime.now().hour;
 
-    if (hour < 11) {
+    if (hour < 10) {
       return 'Selamat pagi';
-    } else if (hour < 15) {
+    } else if (hour < 14) {
       return 'Selamat siang';
     } else if (hour < 18) {
       return 'Selamat sore';
@@ -121,9 +121,10 @@ class _HomePageState extends State<HomePage> {
         ModalRoute.of(context)?.settings.arguments as String? ?? 'user';
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
         title: const Text('Agenda Nusantara'),
-        backgroundColor: const Color(0xFFCC0000),
+        backgroundColor: const Color(0xFF1565C0),
         foregroundColor: Colors.white,
         automaticallyImplyLeading: false,
         actions: [
@@ -144,7 +145,7 @@ class _HomePageState extends State<HomePage> {
         onRefresh: _loadCounts,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -174,7 +175,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Statistik
               _isLoading
@@ -214,11 +215,12 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-
+              const SizedBox(height: 18),
+              
               // Grafik
               if (!_isLoading) ...[
                 _ChartSection(chartData: _chartData),
-                const SizedBox(height: 28),
+                const SizedBox(height: 18),
               ],
 
               // Tambah Tugas
@@ -254,7 +256,7 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 18),
 
               // Lihat tugas
               const Text(
@@ -316,7 +318,7 @@ class _ChartSection extends StatelessWidget {
     if (chartData.isEmpty) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
@@ -347,11 +349,11 @@ class _ChartSection extends StatelessWidget {
     final maxCount =
         chartData.map((e) => e['count'] as int).reduce((a, b) => a > b ? a : b);
 
-    const double chartHeight = 90;
+    const double chartHeight = 70;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -371,9 +373,9 @@ class _ChartSection extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           SizedBox(
-            height: chartHeight + 45,
+            height: chartHeight + 35,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: chartData.map((item) {
@@ -458,33 +460,35 @@ class _StatCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withOpacity(0.08),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: color.withOpacity(0.3),
+            color: color.withOpacity(0.2),
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(width: 12),
+            Icon(icon, color: color, size: 26),
+            const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '$count',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: color,
+                    height: 1,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   label,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.grey,
                   ),
                 ),
