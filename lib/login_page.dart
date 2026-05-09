@@ -44,8 +44,8 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Username atau password salah'),
-          backgroundColor: Colors.red,
+          content: Text('Username atau password salah.'),
+          backgroundColor: Color(0xFFD32F2F),
         ),
       );
     }
@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFFF5F7FB),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -68,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: 90,
                     height: 90,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFCC0000),
+                      color: const Color(0xFF1565C0),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Icon(
@@ -83,30 +83,34 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFCC0000),
+                      color: Color(0xFF1565C0),
                     ),
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Kelola Agenda Anda',
+                    'Kelola Agenda, Wujudkan Rencana Nyata',
                     style: TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 40),
                   TextFormField(
                     controller: _usernameCtrl,
                     decoration: const InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
                       labelText: 'Username',
                       prefixIcon: Icon(Icons.person_outline),
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) =>
-                        v == null || v.isEmpty ? 'Username wajib diisi' : null,
+                        v == null || v.isEmpty ? 'Username wajib diisi!' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordCtrl,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outline),
                       border: const OutlineInputBorder(),
@@ -119,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     validator: (v) =>
-                        v == null || v.isEmpty ? 'Password wajib diisi' : null,
+                        v == null || v.isEmpty ? 'Password wajib diisi!' : null,
                   ),
                   const SizedBox(height: 28),
                   SizedBox(
@@ -127,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFCC0000),
+                        backgroundColor: const Color(0xFF1565C0),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -143,8 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text('Masuk',
-                              style: TextStyle(fontSize: 16)),
+                          : const Text('Masuk', style: TextStyle(fontSize: 16)),
                     ),
                   ),
                 ],

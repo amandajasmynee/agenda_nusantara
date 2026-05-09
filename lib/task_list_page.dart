@@ -83,6 +83,11 @@ class _TaskListPageState extends State<TaskListPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         title: const Text('Hapus Tugas'),
         content: Text('Hapus "${task.title}"?'),
         actions: [
@@ -101,9 +106,15 @@ class _TaskListPageState extends State<TaskListPage> {
     if (confirm == true) {
       await DatabaseHelper.instance.deleteTask(task.id!);
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Tugas dihapus')));
-      _loadTasks();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFFD32F2F),
+          content: const Text(
+            'Tugas telah dihapus!',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
     }
   }
 
@@ -129,15 +140,15 @@ class _TaskListPageState extends State<TaskListPage> {
   // Tidak tampil di:
   // - Tugas Belum Selesai
   // - Tugas Selesai
-  bool get _showFab =>
-    _args.category == null && _args.isDone == null;
+  bool get _showFab => _args.category == null && _args.isDone == null;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
         title: Text(_pageTitle),
-        backgroundColor: const Color(0xFFCC0000),
+        backgroundColor: const Color(0xFF1565C0),
         foregroundColor: Colors.white,
       ),
       body: _isLoading
@@ -183,7 +194,7 @@ class _TaskListPageState extends State<TaskListPage> {
                 );
                 _loadTasks();
               },
-              backgroundColor: const Color(0xFFCC0000),
+              backgroundColor: const Color(0xFF1565C0),
               child: const Icon(Icons.add, color: Colors.white),
             )
           : null,
@@ -208,15 +219,17 @@ class _TaskCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDone = task.isDone == 1;
     final isImportant = task.category == 'important';
-    final arrowColor = isImportant ? Colors.red : Colors.green;
-    final badgeColor = isImportant ? Colors.red : Colors.green;
+    final arrowColor = isImportant ? Colors.red : const Color(0xFF2E7D32);
+    final badgeColor = isImportant ? Colors.red : const Color(0xFF2E7D32);
     final badgeLabel = isImportant ? 'Penting' : 'Biasa';
 
     return Card(
-      elevation: 3,
+      color: isImportant ? const Color(0xFFFFF1F1) : const Color(0xFFF1FAF3),
+      surfaceTintColor: Colors.transparent,
+      elevation: 1.5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: arrowColor.withOpacity(0.35), width: 1.2),
+        side: BorderSide(color: arrowColor.withValues(alpha: 0.75), width: 1.5),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -272,10 +285,11 @@ class _TaskCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: badgeColor.withOpacity(0.12),
+                          color: badgeColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: badgeColor.withOpacity(0.5), width: 1),
+                              color: badgeColor.withValues(alpha: 0.5),
+                              width: 1),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -340,10 +354,10 @@ class _TaskCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: arrowColor.withOpacity(0.1),
+                    color: arrowColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Icon(Icons.arrow_forward_ios_rounded,
+                  child: Icon(Icons.chevron_right_rounded,
                       color: arrowColor, size: 22),
                 ),
               ],

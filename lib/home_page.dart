@@ -150,7 +150,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               // Greeting
               Text(
-                '${_greeting()}, ${username[0].toUpperCase()}${username.substring(1)} 👋',
+                '${_greeting()}, ${username[0].toUpperCase()}${username.substring(1)} 👋!',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -271,7 +271,7 @@ class _HomePageState extends State<HomePage> {
               _MenuCard(
                 icon: Icons.star_rounded,
                 title: 'Tugas Penting',
-                subtitle: 'Kelola tugas prioritas tinggi',
+                subtitle: 'Kelola tugas prioritas',
                 color: Colors.red,
                 onTap: () => _openTaskList(category: 'important'),
               ),
@@ -281,7 +281,7 @@ class _HomePageState extends State<HomePage> {
               _MenuCard(
                 icon: Icons.task_alt_rounded,
                 title: 'Tugas Biasa',
-                subtitle: 'Daftar aktivitas sehari-hari',
+                subtitle: 'Kelola tugas biasa',
                 color: const Color(0xFF2E7D32),
                 onTap: () => _openTaskList(category: 'regular'),
               ),
@@ -315,7 +315,7 @@ class _ChartSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
             ),
           ],
@@ -350,7 +350,7 @@ class _ChartSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
           ),
         ],
@@ -453,10 +453,10 @@ class _StatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
@@ -517,10 +517,10 @@ class _ActionButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: color.withOpacity(0.4),
+            color: color.withValues(alpha: 0.4),
           ),
         ),
         child: Column(
@@ -570,7 +570,7 @@ class _MenuCard extends StatelessWidget {
       elevation: 2,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.15),
+          backgroundColor: color.withValues(alpha: 0.15),
           child: Icon(icon, color: color),
         ),
         title: Text(

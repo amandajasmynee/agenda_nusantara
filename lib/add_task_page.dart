@@ -27,8 +27,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      _argCategory =
-          ModalRoute.of(context)?.settings.arguments as String?;
+      _argCategory = ModalRoute.of(context)?.settings.arguments as String?;
       if (_argCategory != null) {
         _category = _argCategory!;
       }
@@ -52,7 +51,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   Color get _themeColor =>
-      _category == 'important' ? Colors.red : Colors.blue;
+      _category == 'important' ? Colors.red : const Color(0xFF2E7D32);
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
@@ -66,6 +65,20 @@ class _AddTaskPageState extends State<AddTaskPage> {
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: Color(0xFF1565C0), // header & selected date
+                onPrimary: Colors.white,
+                surface: Colors.white,
+                onSurface: Colors.black87,
+              ),
+              dialogTheme:
+                  const DialogThemeData(backgroundColor: Colors.white)),
+          child: child!,
+        );
+      },
     );
     if (picked != null) setState(() => _selectedDueDate = picked);
   }
@@ -75,9 +88,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
     if (_selectedDueDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tanggal jatuh tempo wajib dipilih'),
+        SnackBar(
           backgroundColor: Colors.orange,
+          content: const Text(
+            'Tanggal deadline wajib dipilih!',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       );
       return;
@@ -99,9 +115,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
     setState(() => _isSaving = false);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tugas berhasil ditambahkan!'),
-        backgroundColor: Colors.green,
+      SnackBar(
+        backgroundColor: const Color(0xFF2E7D32),
+        content: const Text(
+          'Tugas berhasil ditambahkan!',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
 
@@ -111,9 +130,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
         title: Text(_pageTitle),
-        backgroundColor: const Color(0xFFCC0000),
+        backgroundColor: const Color(0xFF1565C0),
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -141,7 +161,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   border: OutlineInputBorder(),
                 ),
                 validator: (v) =>
-                    v == null || v.isEmpty ? 'Judul wajib diisi' : null,
+                    v == null || v.isEmpty ? 'Judul wajib diisi!' : null,
               ),
               const SizedBox(height: 16),
 
@@ -160,7 +180,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
               // ── Tanggal Jatuh Tempo ───────────────────────────────────────
               const Text(
-                'Tanggal Jatuh Tempo',
+                'Tanggal Deadline',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
@@ -169,13 +189,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 borderRadius: BorderRadius.circular(4),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: _selectedDueDate != null
-                          ? _themeColor
-                          : Colors.grey,
+                      color:
+                          _selectedDueDate != null ? _themeColor : Colors.grey,
                     ),
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -212,7 +231,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 child: ElevatedButton(
                   onPressed: _isSaving ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFCC0000),
+                    backgroundColor: const Color(0xFF1565C0),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -228,8 +247,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text('Simpan',
-                          style: TextStyle(fontSize: 16)),
+                      : const Text('Simpan', style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],
@@ -250,15 +268,15 @@ class _LockedCategoryBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isImportant = category == 'important';
-    final color = isImportant ? Colors.red : Colors.blue;
+    final color = isImportant ? Colors.red : const Color(0xFF2E7D32);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
@@ -310,7 +328,7 @@ class _CategorySelector extends StatelessWidget {
               label: 'Tugas Biasa',
               icon: Icons.task_alt_rounded,
               selected: selected == 'regular',
-              color: Colors.blue,
+              color: const Color(0xFF2E7D32),
               onTap: () => onChanged('regular'),
             ),
             const SizedBox(width: 10),
@@ -350,9 +368,9 @@ class _CategoryChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.15) : Colors.grey.shade100,
-          border: Border.all(
-              color: selected ? color : Colors.grey.shade300),
+          color:
+              selected ? color.withValues(alpha: 0.15) : Colors.grey.shade100,
+          border: Border.all(color: selected ? color : Colors.grey.shade300),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -363,8 +381,7 @@ class _CategoryChip extends StatelessWidget {
               label,
               style: TextStyle(
                 color: selected ? color : Colors.grey,
-                fontWeight:
-                    selected ? FontWeight.w600 : FontWeight.normal,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
           ],
