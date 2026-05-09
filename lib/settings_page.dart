@@ -18,12 +18,8 @@ class SettingsPage extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          // ── Header Profil Kecil ────────────────────────────────────────
           _ProfileHeader(username: username),
-
           const SizedBox(height: 20),
-
-          // ── Section: Akun ──────────────────────────────────────────────
           _SectionLabel(label: 'AKUN'),
           const SizedBox(height: 6),
           _MenuGroup(
@@ -39,21 +35,11 @@ class SettingsPage extends StatelessWidget {
                 icon: Icons.info_outline,
                 iconColor: Colors.blue,
                 title: 'Tentang Aplikasi',
-                onTap: () => showAboutDialog(
-                  context: context,
-                  applicationName: 'Agenda Nusantara',
-                  applicationVersion: '1.0.0',
-                  children: const [
-                    Text('Aplikasi manajemen agenda dan tugas harian.'),
-                  ],
-                ),
+                onTap: () => _showAboutDialog(context),
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // ── Section: Sesi ──────────────────────────────────────────────
           _SectionLabel(label: 'SESI'),
           const SizedBox(height: 6),
           _MenuGroup(
@@ -68,14 +54,128 @@ class SettingsPage extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 32),
         ],
       ),
     );
   }
 
-  // ── Dialog Ganti Password ──────────────────────────────────────────────────
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFCC0000),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/images/developer.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Agenda Nusantara',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFCC0000).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'v1.0.0',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFFCC0000),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Divider(color: Colors.grey.shade200, height: 1),
+              const SizedBox(height: 16),
+              Text(
+                'Aplikasi manajemen agenda dan tugas harian untuk membantu pengguna mengatur kegiatan penting maupun rutin secara efisien.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade600,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: const Column(
+                  children: [
+                    _AboutRow(
+                      icon: Icons.person_outline,
+                      label: 'Developer',
+                      value: 'Amanda Jasmyne Berliana Putri',
+                    ),
+                    SizedBox(height: 8),
+                    _AboutRow(
+                      icon: Icons.badge_outlined,
+                      label: 'NIM',
+                      value: '2241760081',
+                    ),
+                    SizedBox(height: 8),
+                    _AboutRow(
+                      icon: Icons.build_outlined,
+                      label: 'Teknologi',
+                      value: 'Flutter + SQLite',
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFCC0000),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text('Tutup'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   void _showChangePasswordDialog(BuildContext context, String username) {
     final oldPassCtrl = TextEditingController();
@@ -130,9 +230,8 @@ class SettingsPage extends StatelessWidget {
                       ),
                       validator: (v) {
                         if (v == null || v.isEmpty) return 'Wajib diisi';
-                        if (v != newPassCtrl.text) {
+                        if (v != newPassCtrl.text)
                           return 'Password tidak cocok';
-                        }
                         return null;
                       },
                     ),
@@ -194,8 +293,6 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  // ── Dialog Konfirmasi Logout ───────────────────────────────────────────────
-
   void _confirmLogout(BuildContext context) {
     showDialog(
       context: context,
@@ -220,12 +317,15 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-// ── Header Profil Kecil ───────────────────────────────────────────────────────
-
 class _ProfileHeader extends StatelessWidget {
   final String username;
 
   const _ProfileHeader({required this.username});
+
+  String _formatName(String username) {
+    if (username.isEmpty) return username;
+    return username[0].toUpperCase() + username.substring(1);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +334,6 @@ class _ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          // Icon user dalam lingkaran
           Container(
             width: 48,
             height: 48,
@@ -247,22 +346,20 @@ class _ProfileHeader extends StatelessWidget {
               ),
             ),
             child: ClipOval(
-            child: Image.asset(
-              'assets/images/profile.jpg',
-              width: 48,
-              height: 48,
-              fit: BoxFit.cover,
+              child: Image.asset(
+                'assets/images/profile.jpeg',
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          ),
           const SizedBox(width: 14),
-
-          // Teks info
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${username[0].toUpperCase()}${username.substring(1)} 👋',
+                '${_formatName(username)} 👋',
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -285,8 +382,6 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-// ── Label Section ─────────────────────────────────────────────────────────────
-
 class _SectionLabel extends StatelessWidget {
   final String label;
 
@@ -308,8 +403,6 @@ class _SectionLabel extends StatelessWidget {
     );
   }
 }
-
-// ── Grup Menu (kartu putih) ───────────────────────────────────────────────────
 
 class _MenuGroup extends StatelessWidget {
   final List<Widget> children;
@@ -335,8 +428,6 @@ class _MenuGroup extends StatelessWidget {
     );
   }
 }
-
-// ── Tile Pengaturan ───────────────────────────────────────────────────────────
 
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
@@ -393,7 +484,42 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
-// ── Divider tipis antar tile ──────────────────────────────────────────────────
+class _AboutRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _AboutRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: Colors.grey),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class _Divider extends StatelessWidget {
   @override
