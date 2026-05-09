@@ -116,18 +116,21 @@ class _TaskListPageState extends State<TaskListPage> {
     return 'Semua Tugas';
   }
 
-  // Kategori yang dikirim ke AddTaskPage:
-  // - filter status (isDone) → pakai addCategory atau default 'regular'
-  // - filter kategori → pakai kategori itu
-  // - semua tugas → null (AddTaskPage tampilkan pilihan)
   String? get _addTaskArgument {
     if (_args.isDone != null) return null;
     return _args.category; // bisa null → pilihan muncul
   }
 
-  // FAB hanya tampil jika bukan halaman filter "Selesai"
-  // (tidak masuk akal menambah tugas baru dari halaman tugas selesai)
-  bool get _showFab => _args.isDone != 1;
+  // FAB hanya tampil di:
+  // - Semua Tugas
+  // - Tugas Penting
+  // - Tugas Biasa
+  //
+  // Tidak tampil di:
+  // - Tugas Belum Selesai
+  // - Tugas Selesai
+  bool get _showFab =>
+    _args.category == null && _args.isDone == null;
 
   @override
   Widget build(BuildContext context) {
