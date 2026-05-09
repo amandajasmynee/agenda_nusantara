@@ -183,109 +183,266 @@ class SettingsPage extends StatelessWidget {
     final confirmCtrl = TextEditingController();
     final formKey = GlobalKey<FormState>();
     bool isSaving = false;
+    bool obscureOld = true;
+    bool obscureNew = true;
+    bool obscureConfirm = true;
 
     showDialog(
       context: context,
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text('Ganti Password'),
-              content: Form(
-                key: formKey,
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextFormField(
-                      controller: oldPassCtrl,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Password Lama',
-                        border: OutlineInputBorder(),
+                    // ── Icon lock ──────────────────────────────────────────
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFCC0000).withOpacity(0.08),
+                        shape: BoxShape.circle,
                       ),
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Wajib diisi' : null,
+                      child: const Icon(
+                        Icons.lock_outline_rounded,
+                        color: Color(0xFFCC0000),
+                        size: 28,
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    TextFormField(
-                      controller: newPassCtrl,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Password Baru',
-                        border: OutlineInputBorder(),
+
+                    // ── Judul ──────────────────────────────────────────────
+                    const Text(
+                      'Ganti Password',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return 'Wajib diisi';
-                        if (v.length < 4) return 'Minimal 4 karakter';
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: confirmCtrl,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Konfirmasi Password Baru',
-                        border: OutlineInputBorder(),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Masukkan password lama dan password baru Anda',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                        height: 1.4,
                       ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return 'Wajib diisi';
-                        if (v != newPassCtrl.text)
-                          return 'Password tidak cocok';
-                        return null;
-                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // ── Divider ────────────────────────────────────────────
+                    Divider(color: Colors.grey.shade200, height: 1),
+                    const SizedBox(height: 20),
+
+                    // ── Form ───────────────────────────────────────────────
+                    Form(
+                      key: formKey,
+                      child: Column(
+                        children: [
+                          // Password lama
+                          TextFormField(
+                            controller: oldPassCtrl,
+                            obscureText: obscureOld,
+                            decoration: InputDecoration(
+                              labelText: 'Password Lama',
+                              prefixIcon:
+                                  const Icon(Icons.lock_outline, size: 20),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  obscureOld
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  size: 20,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () => setDialogState(
+                                    () => obscureOld = !obscureOld),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 14),
+                            ),
+                            validator: (v) => v == null || v.isEmpty
+                                ? 'Password lama wajib diisi'
+                                : null,
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Password baru
+                          TextFormField(
+                            controller: newPassCtrl,
+                            obscureText: obscureNew,
+                            decoration: InputDecoration(
+                              labelText: 'Password Baru',
+                              prefixIcon: const Icon(Icons.lock_reset_outlined,
+                                  size: 20),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  obscureNew
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  size: 20,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () => setDialogState(
+                                    () => obscureNew = !obscureNew),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 14),
+                            ),
+                            validator: (v) {
+                              if (v == null || v.isEmpty) {
+                                return 'Password baru wajib diisi';
+                              }
+                              if (v.length < 4) {
+                                return 'Minimal 4 karakter';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Konfirmasi password baru
+                          TextFormField(
+                            controller: confirmCtrl,
+                            obscureText: obscureConfirm,
+                            decoration: InputDecoration(
+                              labelText: 'Konfirmasi Password Baru',
+                              prefixIcon: const Icon(Icons.check_circle_outline,
+                                  size: 20),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  obscureConfirm
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  size: 20,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () => setDialogState(
+                                    () => obscureConfirm = !obscureConfirm),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 14),
+                            ),
+                            validator: (v) {
+                              if (v == null || v.isEmpty) {
+                                return 'Konfirmasi password wajib diisi';
+                              }
+                              if (v != newPassCtrl.text) {
+                                return 'Password tidak cocok';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // ── Tombol ─────────────────────────────────────────────
+                    Row(
+                      children: [
+                        // Tombol Batal
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              side: BorderSide(color: Colors.grey.shade300),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Batal',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Tombol Simpan
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: isSaving
+                                ? null
+                                : () async {
+                                    if (!formKey.currentState!.validate()) {
+                                      return;
+                                    }
+                                    setDialogState(() => isSaving = true);
+
+                                    final ok = await DatabaseHelper.instance
+                                        .changePassword(
+                                      username,
+                                      oldPassCtrl.text.trim(),
+                                      newPassCtrl.text.trim(),
+                                    );
+
+                                    if (!dialogContext.mounted) return;
+                                    setDialogState(() => isSaving = false);
+                                    Navigator.pop(dialogContext);
+
+                                    ScaffoldMessenger.of(dialogContext)
+                                        .showSnackBar(
+                                      SnackBar(
+                                        content: Text(ok
+                                            ? 'Password berhasil diubah!'
+                                            : 'Password lama salah!'),
+                                        backgroundColor:
+                                            ok ? Colors.green : Colors.red,
+                                      ),
+                                    );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFCC0000),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: isSaving
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Simpan',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Batal'),
-                ),
-                ElevatedButton(
-                  onPressed: isSaving
-                      ? null
-                      : () async {
-                          if (!formKey.currentState!.validate()) return;
-                          setDialogState(() => isSaving = true);
-
-                          final ok =
-                              await DatabaseHelper.instance.changePassword(
-                            username,
-                            oldPassCtrl.text.trim(),
-                            newPassCtrl.text.trim(),
-                          );
-
-                          if (!dialogContext.mounted) return;
-                          setDialogState(() => isSaving = false);
-                          Navigator.pop(dialogContext);
-
-                          ScaffoldMessenger.of(dialogContext).showSnackBar(
-                            SnackBar(
-                              content: Text(ok
-                                  ? 'Password berhasil diubah!'
-                                  : 'Password lama salah!'),
-                              backgroundColor: ok ? Colors.green : Colors.red,
-                            ),
-                          );
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFCC0000),
-                    foregroundColor: Colors.white,
-                  ),
-                  child: isSaving
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text('Simpan'),
-                ),
-              ],
             );
           },
         );
