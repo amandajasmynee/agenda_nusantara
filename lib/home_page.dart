@@ -11,6 +11,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _doneTasks = 0;
   int _undoneTasks = 0;
+  int _totalTasks = 0;
   bool _isLoading = true;
   List<Map<String, dynamic>> _chartData = [];
 
@@ -77,12 +78,14 @@ class _HomePageState extends State<HomePage> {
     final done = await DatabaseHelper.instance.countDoneTasks();
     final undone = await DatabaseHelper.instance.countUndoneTasks();
     final chart = await DatabaseHelper.instance.getCompletedTasksPerDay();
+    final total = done + undone;
 
     if (!mounted) return;
 
     setState(() {
       _doneTasks = done;
       _undoneTasks = undone;
+      _totalTasks = total;
       _chartData = chart;
       _isLoading = false;
     });
@@ -176,30 +179,41 @@ class _HomePageState extends State<HomePage> {
               // Statistik
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : Row(
+                  : Column(
                       children: [
-                        Expanded(
-                          child: _StatCard(
-                            label: 'Belum Selesai',
-                            count: _undoneTasks,
-                            color: Colors.orange,
-                            icon: Icons.pending_actions_rounded,
-                            onTap: () => _openTaskList(isDone: 0),
-                          ),
+                        _StatCard(
+                          label: 'Semua Tugas',
+                          count: _totalTasks,
+                          color: Colors.teal,
+                          icon: Icons.list_alt_rounded,
+                          onTap: () => _openTaskList(),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _StatCard(
-                            label: 'Selesai',
-                            count: _doneTasks,
-                            color: Colors.green,
-                            icon: Icons.check_circle_rounded,
-                            onTap: () => _openTaskList(isDone: 1),
-                          ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _StatCard(
+                                label: 'Belum Selesai',
+                                count: _undoneTasks,
+                                color: Colors.orange,
+                                icon: Icons.pending_actions_rounded,
+                                onTap: () => _openTaskList(isDone: 0),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _StatCard(
+                                label: 'Selesai',
+                                count: _doneTasks,
+                                color: Colors.green,
+                                icon: Icons.check_circle_rounded,
+                                onTap: () => _openTaskList(isDone: 1),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-              const SizedBox(height: 28),
 
               // Grafik
               if (!_isLoading) ...[
