@@ -51,8 +51,8 @@ class DatabaseHelper {
 
     // Insert user default
     await db.insert('user', {
-      'username': 'user',
-      'password': 'user',
+      'username': 'aziz',
+      'password': '12345',
     });
   }
 

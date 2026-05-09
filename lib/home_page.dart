@@ -13,6 +13,20 @@ class _HomePageState extends State<HomePage> {
   int _undoneTasks = 0;
   bool _isLoading = true;
 
+  String _greeting() {
+    final hour = DateTime.now().hour;
+
+    if (hour < 11) {
+      return 'Selamat pagi';
+    } else if (hour < 15) {
+      return 'Selamat siang';
+    } else if (hour < 18) {
+      return 'Selamat sore';
+    } else {
+      return 'Selamat malam';
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -73,9 +87,9 @@ class _HomePageState extends State<HomePage> {
             children: [
               // Sambutan
               Text(
-                'Halo, $username!',
-                style: const TextStyle(
-                    fontSize: 20, fontWeight: FontWeight.bold),
+                '${_greeting()}, ${username[0].toUpperCase()}${username.substring(1)} 👋',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               const Text(
@@ -210,9 +224,7 @@ class _StatCard extends StatelessWidget {
               Text(
                 '$count',
                 style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: color),
+                    fontSize: 24, fontWeight: FontWeight.bold, color: color),
               ),
               Text(label,
                   style: const TextStyle(fontSize: 12, color: Colors.grey)),
@@ -298,8 +310,7 @@ class _MenuCard extends StatelessWidget {
           backgroundColor: color.withOpacity(0.15),
           child: Icon(icon, color: color),
         ),
-        title:
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
