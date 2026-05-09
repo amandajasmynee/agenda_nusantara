@@ -216,7 +216,7 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
               const SizedBox(height: 18),
-              
+
               // Grafik
               if (!_isLoading) ...[
                 _ChartSection(chartData: _chartData),
@@ -249,7 +249,7 @@ class _HomePageState extends State<HomePage> {
                     child: _ActionButton(
                       icon: Icons.task_alt_rounded,
                       label: 'Tambah Tugas\nBiasa',
-                      color: Colors.blue,
+                      color: const Color(0xFF2E7D32),
                       onTap: () => _goToAddTask('regular'),
                     ),
                   ),
@@ -283,19 +283,11 @@ class _HomePageState extends State<HomePage> {
                 icon: Icons.task_alt_rounded,
                 title: 'Tugas Biasa',
                 subtitle: 'Daftar aktivitas sehari-hari',
-                color: Colors.blue,
+                color: const Color(0xFF2E7D32),
                 onTap: () => _openTaskList(category: 'regular'),
               ),
 
               const SizedBox(height: 10),
-
-              _MenuCard(
-                icon: Icons.list_alt_rounded,
-                title: 'Semua Tugas',
-                subtitle: 'Lihat seluruh agenda Anda',
-                color: Colors.teal,
-                onTap: () => _openTaskList(),
-              ),
             ],
           ),
         ),
@@ -403,14 +395,14 @@ class _ChartSection extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: Colors.green,
+                            color: const Color(0xFF1565C0),
                           ),
                         ),
                         const SizedBox(height: 4),
                         Container(
                           height: barHeight,
                           decoration: BoxDecoration(
-                            color: Colors.green,
+                            color: const Color(0xFF1565C0),
                             borderRadius: BorderRadius.circular(6),
                           ),
                         ),
@@ -575,6 +567,7 @@ class _MenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.white,
       elevation: 2,
       child: ListTile(
         leading: CircleAvatar(
