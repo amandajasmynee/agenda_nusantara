@@ -122,6 +122,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
+        elevation: 0,
         title: const Text('Agenda Nusantara'),
         backgroundColor: const Color(0xFF1565C0),
         foregroundColor: Colors.white,
@@ -149,28 +150,44 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Greeting
-              Text(
-                '${_greeting()}, ${username[0].toUpperCase()}${username.substring(1)} 👋!',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-              ),
-
-              const SizedBox(height: 4),
-
-              const Text(
-                'Apa yang ingin Anda kelola hari ini?',
-                style: TextStyle(color: Colors.grey),
-              ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                _formattedDateTime(),
-                style: TextStyle(
-                  color: Colors.grey.shade500,
-                  fontSize: 12,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${_greeting()}, ${username[0].toUpperCase()}${username.substring(1)} 👋!',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Apa yang ingin Anda kelola hari ini?',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _formattedDateTime(),
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
