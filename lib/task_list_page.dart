@@ -105,14 +105,13 @@ class _TaskListPageState extends State<TaskListPage> {
 
     if (confirm == true) {
       await DatabaseHelper.instance.deleteTask(task.id!);
+
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFFD32F2F),
-          content: const Text(
-            'Tugas telah dihapus!',
-            style: TextStyle(color: Colors.white),
-          ),
+        const SnackBar(
+          backgroundColor: Color(0xFFD32F2F),
+          content: Text('Tugas telah dihapus!'),
         ),
       );
     }
