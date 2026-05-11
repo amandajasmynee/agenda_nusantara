@@ -51,7 +51,7 @@ class DatabaseHelper {
       )
     ''');
 
-    await db.insert('user', {'username': 'aziz', 'password': '12345'});
+    await db.insert('user', {'username': 'user', 'password': 'user'});
   }
 
   // ── onUpgrade ──────────────────────────────────────────────────────────────
