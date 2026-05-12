@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
 import 'task_model.dart';
+import 'detail_task_page.dart';
 
 // ── Helper: parsing argument dari Navigator ────────────────────────────────
 //
@@ -228,14 +229,17 @@ class _TaskCard extends StatelessWidget {
       elevation: 1.5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: arrowColor.withValues(alpha: 0.75), width: 1.5),
+        side: BorderSide(
+          color: arrowColor.withValues(alpha: 0.75),
+          width: 1.5,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Checklist
+            // Checklist untuk ubah status selesai/belum
             GestureDetector(
               onTap: onToggle,
               child: Icon(
@@ -246,118 +250,157 @@ class _TaskCard extends StatelessWidget {
                 size: 28,
               ),
             ),
+
             const SizedBox(width: 12),
 
-            // Konten
+            // Konten task, bisa diklik untuk lihat detail
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      decoration: isDone ? TextDecoration.lineThrough : null,
-                      color: isDone ? Colors.grey : Colors.black87,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DetailTaskPage(task: task),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (task.description.isNotEmpty) ...[
-                    const SizedBox(height: 3),
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      task.description,
+                      task.title,
                       style: TextStyle(
-                        fontSize: 12,
-                        color: isDone ? Colors.grey.shade400 : Colors.grey,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        decoration: isDone ? TextDecoration.lineThrough : null,
+                        color: isDone ? Colors.grey : Colors.black87,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      // Badge kategori
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: badgeColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: badgeColor.withValues(alpha: 0.5),
-                              width: 1),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isImportant
-                                  ? Icons.star_rounded
-                                  : Icons.task_alt_rounded,
-                              size: 11,
-                              color: badgeColor,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              badgeLabel,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: badgeColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.calendar_today,
-                          size: 11, color: Colors.grey),
-                      const SizedBox(width: 3),
+                    if (task.description.isNotEmpty) ...[
+                      const SizedBox(height: 3),
                       Text(
-                        task.dueDate,
-                        style:
-                            const TextStyle(fontSize: 11, color: Colors.grey),
+                        task.description,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDone ? Colors.grey.shade400 : Colors.grey,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      // Tanggal selesai
-                      if (isDone && task.completedDate != null) ...[
+                    ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: badgeColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: badgeColor.withValues(alpha: 0.5),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isImportant
+                                    ? Icons.star_rounded
+                                    : Icons.task_alt_rounded,
+                                size: 11,
+                                color: badgeColor,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                badgeLabel,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: badgeColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.check_circle_outline,
-                            size: 11, color: Colors.green),
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 11,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 3),
                         Text(
-                          task.completedDate!,
+                          task.dueDate,
                           style: const TextStyle(
-                              fontSize: 11, color: Colors.green),
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
                         ),
+                        if (isDone && task.completedDate != null) ...[
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.check_circle_outline,
+                            size: 11,
+                            color: Colors.green,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            task.completedDate!,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
+
             const SizedBox(width: 10),
 
-            // Hapus + panah
+            // Delete + panah detail
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
                   onTap: onDelete,
-                  child: const Icon(Icons.delete_outline,
-                      color: Colors.red, size: 22),
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.red,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: arrowColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DetailTaskPage(task: task),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: arrowColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      color: arrowColor,
+                      size: 22,
+                    ),
                   ),
-                  child: Icon(Icons.chevron_right_rounded,
-                      color: arrowColor, size: 22),
                 ),
               ],
             ),
